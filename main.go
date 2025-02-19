@@ -1,21 +1,30 @@
 package main
 
 import (
+	"fetch-rewards-takehome/handlers"
+
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
+
+// In-memory storage for receipts and their points
+var receiptPoints = make(map[string]int)
+
+func SetupRouter() *gin.Engine {
+	r := gin.Default()
+	r.GET("/ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
+
+	receiptHandler := handlers.NewReceiptHandler()
+
+	r.GET("/receipts/:id/points", receiptHandler.GetPoints)
+
+	return r
+}
 
 func main() {
 	// Create a default gin router
-	r := gin.Default()
+	r := SetupRouter()
 
-	// Define a simple route
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	// Run the server on port 8080
 	r.Run(":8080")
 }
