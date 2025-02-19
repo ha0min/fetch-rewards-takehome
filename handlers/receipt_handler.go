@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"fetch-rewards-takehome/models"
+	"fetch-rewards-takehome/services"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,12 +11,14 @@ import (
 )
 
 type ReceiptHandler struct {
-	receipts map[string]int
+	receipts   map[string]int
+	calculator *services.PointsCalculator
 }
 
 func NewReceiptHandler() *ReceiptHandler {
 	return &ReceiptHandler{
-		receipts: make(map[string]int),
+		calculator: services.NewPointsCalculator(),
+		receipts:   make(map[string]int),
 	}
 }
 
@@ -33,18 +37,20 @@ func (h *ReceiptHandler) GetPoints(c *gin.Context) {
 func (h *ReceiptHandler) PostReceipt(c *gin.Context) {
 	var receipt models.Receipt
 	err := c.ShouldBindBodyWithJSON(&receipt)
+	// create new id
+	id := uuid.New().String()
 
 	if err != nil {
+		fmt.Println("[ERROR] ID: ", id, ", Error: ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid receipt"})
 		return
 	}
 
-	// create new id
-	id := uuid.New().String()
+	// calculate points
+	points := h.calculator.CalculatePoints(&receipt)
+	h.receipts[id] = points
 
-	// TODO calculate points
-
-	h.receipts[id] = 100
+	fmt.Println("[INFO] ID: ", id, ", Points: ", points)
 
 	c.JSON(http.StatusOK, models.ReceiptResponse{ID: id})
 }
