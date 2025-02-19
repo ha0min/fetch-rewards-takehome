@@ -18,7 +18,7 @@ func SetupRouter() *gin.Engine {
 	receiptHandler := handlers.NewReceiptHandler()
 
 	r.GET("/receipts/:id/points", receiptHandler.GetPoints)
-
+	r.POST("/receipts/process", receiptHandler.PostReceipt)
 	return r
 }
 

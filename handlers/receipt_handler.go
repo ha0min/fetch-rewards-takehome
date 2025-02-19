@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ReceiptHandler struct {
@@ -27,4 +28,23 @@ func (h *ReceiptHandler) GetPoints(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, models.PointsResponse{Points: points})
+}
+
+func (h *ReceiptHandler) PostReceipt(c *gin.Context) {
+	var receipt models.Receipt
+	err := c.ShouldBindBodyWithJSON(&receipt)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid receipt"})
+		return
+	}
+
+	// create new id
+	id := uuid.New().String()
+
+	// TODO calculate points
+
+	h.receipts[id] = 100
+
+	c.JSON(http.StatusOK, models.ReceiptResponse{ID: id})
 }
